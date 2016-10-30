@@ -123,14 +123,18 @@ new_th = gradientDescent(x, y, theta, a, e)
 fig = pt.figure()
 ax = fig.add_subplot(111)
 
+ax.set_xlabel('X1')
+ax.set_ylabel('X2')
+ax.set_title('Logistic Regression -- Linear')
+
 base_x = np.arange(0, 3, 0.001)
 base_y = 3.0-base_x
 ans_y = -1*(new_th[0]+new_th[1]*base_x)/new_th[2]
 
-ax.plot(base_x,ans_y,color='green',linestyle='-',marker='')
-ax.plot(base_x,base_y,color='black',linestyle='-',marker='')
-ax.plot(x_up,y_up,'bo')
-ax.plot(x_down,y_down,'ro')
-ax.legend()
+divisionLine = ax.plot(base_x,ans_y,color='green',linestyle='-',marker='')
+baseLine = ax.plot(base_x,base_y,color='black',linestyle='-',marker='')
+positive = ax.plot(x_up,y_up,'bo')
+negative = ax.plot(x_down,y_down,'ro')
+ax.legend((divisionLine[0], baseLine[0], positive[0], negative[0]),('DivisionLine', 'BaseLine', 'Positive', 'Negative'))
 
 pt.show()

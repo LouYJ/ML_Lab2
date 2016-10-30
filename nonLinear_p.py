@@ -82,7 +82,7 @@ def gradientDescent(x, y, theta, a, e, lda):
         if tmp<e:
             break
 
-        if count>1000:
+        if count>10000:
             break
 
     print t
@@ -150,7 +150,7 @@ num = 15
 e = 1e-3
 a= 0.01
 order = 5
-lda=0.0001
+lda=0.01
 theta = iniTheta(order)
 print theta
 #生成数据
@@ -170,15 +170,15 @@ T1, T2 = getY(new_th, base_x)
 
 ax.set_xlabel('X1')
 ax.set_ylabel('X2')
-ax.set_title('Logistic Regression -- non-Linear')
+ax.set_title('Logistic Regression -- non-Linear（P）')
 
 divisionLine = ax.plot(base_x,T1,color='yellow',linestyle='',marker='.')
 # ax.plot(base_x,T2,color='orange',linestyle='',marker='.')
 # ax.plot(base_x,ans_y,color='green',linestyle='-',marker='')
-baseLine = ax.plot(base_x,base_y,color='black',linestyle='-',marker='')
+# baseLine = ax.plot(base_x,base_y,color='black',linestyle='-',marker='')
 positive = ax.plot(x_up,y_up,'bo')
 negative = ax.plot(x_down,y_down,'ro')
 ax.axis([0, 1, -1, 4])
-ax.legend( (divisionLine[0], baseLine[0], positive[0], negative[0]), ('divisionLine', 'baseLine', 'positive', 'negative') )
+ax.legend( (divisionLine[0], positive[0], negative[0]), ('DivisionLine', 'Positive', 'Negative') )
 
 pt.show()
