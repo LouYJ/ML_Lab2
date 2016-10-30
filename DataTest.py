@@ -6,24 +6,13 @@ import math
 import matplotlib.pyplot as pt
 
 def sigmod(x):
-    ans = 1.0/(1.0 + np.power(np.e, -1*x))
+    if x < -700:
+        ans = 0.0
+    elif x > 700:
+        ans = 1.0
+    else:
+        ans = 1.0/(1.0 + np.power(np.e, -1*x))
     return ans
-
-def genrateData(num):
-    mu = 0
-    sigma = 1.5
-
-    x_up = 3*np.random.random(num)
-    x_down = 3*np.random.random(num)
-    y_up = []
-    y_down = []
-    for i in range(0,num):
-        offset_Guassian = random.gauss(mu, sigma)
-        y_up.append(4.0-x_up[i]+abs(offset_Guassian))
-        offset_Guassian = random.gauss(mu, sigma)
-        y_down.append(2.0-x_down[i]-abs(offset_Guassian))
-
-    return x_up, y_up, x_down, y_down
 
 def divideLine(beta, x):
     sum = 0.0
@@ -44,11 +33,15 @@ def calGradient(theta, x, y):
     for j in range(0, len(theta)):
         sum = 0.0
         for i in range(0, len(x)):
-            h = sigmod(divideLine(theta, x[i]))
+            test = divideLine(theta, x[i])
+            # print test
+            h = sigmod(test)
             # print 'h',h
             mid = (h-y[i])*x[i][j]
+            # print 'mid', mid
             sum += mid
         gra.append(sum)
+    # print np.array(gra)
     return np.array(gra)
 
 def updateTheta(theta, gra, a):
@@ -66,71 +59,129 @@ def calNorm(x):
 def gradientDescent(x, y, theta, a, e):
     count=0
     t = theta
+    oldGra = gra = calGradient(t, x, y)
+    oldTheta = theta
     while True:
-        # print t
-        gra = calGradient(t, x, y)
-        # print gra
+        tmp1 = calNorm(gra)
         t = updateTheta(t, gra, a)
-        tmp = calNorm(gra)
+        gra = calGradient(t, x, y)
+        tmp2 = calNorm(gra)
+
+        if tmp2 > tmp1:
+            t = oldTheta
+            gra = oldGra
+            a = a/2
+        else:
+            oldTheta = t
+            oldGra = gra
+
         count+=1
-        print 'Gradient=',tmp,', count=',count
-        if tmp<e:
+        print 'Gradient=',tmp2,', count=',count
+        if tmp2<e:
             break
 
         if count>10000:
             break
 
-    print t
+    # print t
     return t
-
-def mergeX(x_up, y_up, x_down, y_down, beta):
-    x=[]
-    y=[]
-    for i in range(0, len(x_up)):
-        ele=[]
-        ele.append(1.0)
-        ele.append(x_up[i])
-        ele.append(y_up[i])
-        x.append(ele)
-        y.append(1)
-    for i in range(0, len(x_down)):
-        ele = []
-        ele.append(1.0)
-        ele.append(x_down[i])
-        ele.append(y_down[i])
-        x.append(ele)
-        y.append(0)
-    return np.array(x), np.array(y)
 
 def iniTheta(order):
     theta = 200 * np.random.random(size=order + 1) - 100
     return theta
 
+def readData(num):
+    x=[]
+    y=[]
+    f = open("haberman.data")
+    line = f.readline()
+
+    count = 0
+    while line:
+
+        value = getNum(line)
+        tmp = [1.0]
+        tmp.append(value[0])
+        tmp.append(value[1])
+        tmp.append(value[2])
+        x.append(tmp)
+        # print np.array(tmp)
+        y.append(value[3]-1)
+
+        count += 1
+        if count == num:
+            break;
+        line = f.readline()
+    f.close()
+    return np.array(x), np.array(y)
+
+def getNum(str):
+    num = []
+    sub = ''
+    for j in range(0, len(str)):
+        if str[j] >= '0' and str[j] <= '9':
+            sub += str[j]
+        else:
+            num.append(int(sub))
+            # print sub
+            sub = ''
+    # print num
+    return np.array(num)
+
+def testData(theta):
+    x = []
+    y = []
+    f = open("haberman.data")
+    line = f.readline()
+    while line:
+
+        value = getNum(line)
+        tmp = [1.0]
+        tmp.append(value[0])
+        tmp.append(value[1])
+        tmp.append(value[2])
+        x.append(tmp)
+        # print np.array(tmp)
+        y.append(value[3] - 1)
+
+        line = f.readline()
+    f.close()
+
+    x = np.array(x)
+    y = np.array(y)
+    estimate = []
+
+    for i in range(0, len(x)):
+        tmp =  sigmod(divideLine(theta, x[i]))
+        if tmp > 0.5:
+            estimate.append(1)
+        else:
+            estimate.append(0)
+
+    for i in range(0, len(y)):
+        if y[i] == estimate[i]:
+            print 'Data', i+1, ':', y[i] + 1, 'Estimate:', estimate[i] + 1, 'Y'
+        else:
+            print 'Data', i+1, ':', y[i] + 1, 'Estimate:', estimate[i] + 1, 'N'
+
+
+
+
 #main---------------------------------------------------
-num = 15
+num = 200
 e = 1e-3
 a= 0.01
-order = 2
+order = 3
 theta = iniTheta(order)
 print theta
 #生成数据
-x_up, y_up, x_down, y_down = genrateData(num)
-x, y = mergeX(x_up, y_up, x_down, y_down, theta)
+x, y = readData(num)
+# print x, y
 #最速下降法求最优解
 new_th = gradientDescent(x, y, theta, a, e)
+print new_th
 
-#画图----------------------------------------------------
-fig = pt.figure()
-ax = fig.add_subplot(111)
+testData(new_th)
 
-base_x = np.arange(0, 3, 0.001)
-base_y = 3.0-base_x
-ans_y = -1*(new_th[0]+new_th[1]*base_x)/new_th[2]
 
-ax.plot(base_x,ans_y,color='green',linestyle='-',marker='')
-ax.plot(base_x,base_y,color='black',linestyle='-',marker='')
-ax.plot(x_up,y_up,'bo')
-ax.plot(x_down,y_down,'ro')
-ax.legend()
 
-pt.show()

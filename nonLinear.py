@@ -79,7 +79,7 @@ def gradientDescent(x, y, theta, a, e):
         if tmp<e:
             break
 
-        if count>10000:
+        if count>1000:
             break
 
     print t
@@ -169,7 +169,7 @@ ax.set_ylabel('X2')
 ax.set_title('Logistic Regression -- non-Linear')
 
 divisionLine = ax.plot(base_x,T1,color='yellow',linestyle='',marker='.')
-#ax.plot(base_x,T2,color='orange',linestyle='',marker='.')
+ax.plot(base_x,T2,color='orange',linestyle='',marker='.')
 # ax.plot(base_x,ans_y,color='green',linestyle='-',marker='')
 baseLine = ax.plot(base_x,base_y,color='black',linestyle='-',marker='')
 positive = ax.plot(x_up,y_up,'bo')
