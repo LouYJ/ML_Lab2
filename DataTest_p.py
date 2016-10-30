@@ -20,15 +20,17 @@ def divideLine(beta, x):
         sum += beta[i]*x[i]
     return sum
 
-def calJ(x, y, beta):
+def calJ(x, y, beta, lda):
     sum = 0.0
     for i in range(0, len(x)):
         h = sigmod(divideLine(beta, x[i]))
         sum += y[i]*math.log(h) + (1-y[i])*math.log(1-h)
+    norm = calNorm(beta)
+    sum += lda * norm * norm  # 加入惩罚项
     return -1*sum
 
 # 函数功能：计算当前的梯度
-def calGradient(theta, x, y):
+def calGradient(theta, x, y, lda):
     gra = []
     for j in range(0, len(theta)):
         sum = 0.0
@@ -40,6 +42,7 @@ def calGradient(theta, x, y):
             mid = (h-y[i])*x[i][j]
             # print 'mid', mid
             sum += mid
+        sum += lda * theta[j]  # 加入惩罚项
         gra.append(sum)
     # print np.array(gra)
     return np.array(gra)
@@ -56,15 +59,15 @@ def calNorm(x):
         ans += x[i]*x[i]
     return np.power(ans, 0.5)
 
-def gradientDescent(x, y, theta, a, e):
+def gradientDescent(x, y, theta, a, e, lda):
     count=0
     t = theta
-    oldGra = gra = calGradient(t, x, y)
+    oldGra = gra = calGradient(t, x, y, lda)
     oldTheta = theta
     while True:
         tmp1 = calNorm(gra)
         t = updateTheta(t, gra, a)
-        gra = calGradient(t, x, y)
+        gra = calGradient(t, x, y, lda)
         tmp2 = calNorm(gra)
 
         if tmp2 > tmp1:
@@ -83,16 +86,17 @@ def gradientDescent(x, y, theta, a, e):
         if tmp2<e:
             break
 
-        if count>5000:
+        if count>10000:
             break
 
     # print t
     return t
 
 def iniTheta(order):
-    # theta = 2*np.random.random(size=order + 1) - 1
-    theta = [-3.48757258, 0.0543333, -0.00603128, 0.07986602]
-    theta = np.array(theta)
+    theta = 50*np.random.random(size=order + 1) - 25
+    # theta = [-3.48757258, 0.0543333, -0.00603128, 0.07986602]
+    # theta = [ 0.73431109, 0.0457217, -0.06683201, 0.08058525]
+    # theta = np.array(theta)
     return theta
 
 def readData(num):
@@ -185,12 +189,13 @@ e = 0.1
 a= 0.01
 order = 3
 theta = iniTheta(order)
+lda = 0.1
 print theta
 #生成数据
 x, y = readData(num)
 # print x, y
 #最速下降法求最优解
-new_th = gradientDescent(x, y, theta, a, e)
+new_th = gradientDescent(x, y, theta, a, e, lda)
 print new_th
 
 testData(new_th)
